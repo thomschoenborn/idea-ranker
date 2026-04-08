@@ -435,15 +435,34 @@ export default function Home() {
       return;
     }
 
-    const nextIdeas = parsedIdeas.map((text, index) => ({
-      id: `${Date.now()}-${index}`,
-      text,
-    }));
-    const shuffled = shuffle(nextIdeas.map((idea) => idea.id));
+    const currentByText = new Map(ideas.map((idea) => [idea.text, idea]));
+    const canReuseExistingOrder =
+      ideas.length === parsedIdeas.length &&
+      parsedIdeas.every((text) => currentByText.has(text)) &&
+      xOrder.length === ideas.length;
 
-    setIdeas(nextIdeas);
-    setXOrder(shuffled);
-    setYOrder([]);
+    if (canReuseExistingOrder) {
+      const nextIdeas = parsedIdeas
+        .map((text) => currentByText.get(text))
+        .filter((idea): idea is Idea => Boolean(idea));
+      const validIds = new Set(nextIdeas.map((idea) => idea.id));
+      const nextXOrder = xOrder.filter((id) => validIds.has(id));
+      const nextYOrder = yOrder.filter((id) => validIds.has(id));
+
+      setIdeas(nextIdeas);
+      setXOrder(nextXOrder);
+      setYOrder(nextYOrder);
+    } else {
+      const nextIdeas = parsedIdeas.map((text, index) => ({
+        id: `${Date.now()}-${index}`,
+        text,
+      }));
+      const shuffled = shuffle(nextIdeas.map((idea) => idea.id));
+      setIdeas(nextIdeas);
+      setXOrder(shuffled);
+      setYOrder([]);
+    }
+
     setSaveStatus("");
     setStep("sortX");
   }
