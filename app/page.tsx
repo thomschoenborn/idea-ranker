@@ -474,7 +474,8 @@ export default function Home() {
     setIsSaving(true);
     setSaveStatus("");
 
-    const finalSeriesName = seriesName.trim() || nextDefaultSeriesName(savedRows);
+    const enteredSeriesName = seriesName.trim();
+    const finalSeriesName = enteredSeriesName || nextDefaultSeriesName(savedRows);
 
     const payload = {
       axis_1_label: axis1.trim(),
@@ -513,7 +514,7 @@ export default function Home() {
     }
     setSeriesName(finalSeriesName);
     setSaveStatus(
-      seriesName.trim()
+      enteredSeriesName
         ? `Ranking "${finalSeriesName}" saved to Supabase.`
         : `Ranking saved as "${finalSeriesName}" (date+iteration fallback).`,
     );
