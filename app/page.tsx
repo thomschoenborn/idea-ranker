@@ -134,7 +134,7 @@ function SortableIdeaCard({
             aria-label={`Delete ${text}`}
             title="Delete item"
           >
-            ×
+            🗑
           </button>
         </div>
       </div>
@@ -248,12 +248,12 @@ export default function Home() {
   const [step, setStep] = useState<Step>("labels");
   const [axis1, setAxis1] = useState("Effort");
   const [axis2, setAxis2] = useState("Impact");
-  const [axis1TopLabel, setAxis1TopLabel] = useState("Low effort");
-  const [axis1BottomLabel, setAxis1BottomLabel] = useState("High effort");
+  const [axis1TopLabel, setAxis1TopLabel] = useState("High effort");
+  const [axis1BottomLabel, setAxis1BottomLabel] = useState("Low effort");
   const [axis2TopLabel, setAxis2TopLabel] = useState("High impact");
   const [axis2BottomLabel, setAxis2BottomLabel] = useState("Low impact");
-  const [axis1PositiveEnd, setAxis1PositiveEnd] = useState<"top" | "bottom">("top");
-  const [axis2PositiveEnd, setAxis2PositiveEnd] = useState<"top" | "bottom">("top");
+  const [axis1LeftLabelPosition, setAxis1LeftLabelPosition] = useState<"top" | "bottom">("bottom");
+  const [axis2TopLabelPosition, setAxis2TopLabelPosition] = useState<"top" | "bottom">("top");
   const [seriesName, setSeriesName] = useState("");
   const [shouldSave, setShouldSave] = useState(true);
   const [savedRows, setSavedRows] = useState<SavedRankingRow[]>([]);
@@ -324,8 +324,22 @@ export default function Home() {
       setAxis1BottomLabel(typeof ideasMeta.axis_1_bottom_label === "string" ? ideasMeta.axis_1_bottom_label : "Bottom");
       setAxis2TopLabel(typeof ideasMeta.axis_2_top_label === "string" ? ideasMeta.axis_2_top_label : "Top");
       setAxis2BottomLabel(typeof ideasMeta.axis_2_bottom_label === "string" ? ideasMeta.axis_2_bottom_label : "Bottom");
-      setAxis1PositiveEnd(ideasMeta.axis_1_positive_end === "bottom" ? "bottom" : "top");
-      setAxis2PositiveEnd(ideasMeta.axis_2_positive_end === "bottom" ? "bottom" : "top");
+      const legacyAxis1Positive = ideasMeta.axis_1_positive_end;
+      const legacyAxis2Positive = ideasMeta.axis_2_positive_end;
+      setAxis1LeftLabelPosition(
+        ideasMeta.axis_1_left_label_position === "top"
+          ? "top"
+          : legacyAxis1Positive === "top"
+            ? "bottom"
+            : "top",
+      );
+      setAxis2TopLabelPosition(
+        ideasMeta.axis_2_top_label_position === "bottom"
+          ? "bottom"
+          : legacyAxis2Positive === "bottom"
+            ? "bottom"
+            : "top",
+      );
       setSeriesName(typeof ideasMeta.series_name === "string" ? ideasMeta.series_name : "");
       setShouldSave(true);
       setSavedRankingId(target.id);
@@ -373,11 +387,11 @@ export default function Home() {
       idea: idea.text,
       xRank: xRank.get(idea.id) ?? 0,
       yRank: yRank.get(idea.id) ?? 0,
-      x: centeredValueFromRank(xRank.get(idea.id) ?? 0, total, axis1PositiveEnd === "top"),
-      y: centeredValueFromRank(yRank.get(idea.id) ?? 0, total, axis2PositiveEnd === "top"),
+      x: centeredValueFromRank(xRank.get(idea.id) ?? 0, total, axis1LeftLabelPosition === "bottom"),
+      y: centeredValueFromRank(yRank.get(idea.id) ?? 0, total, axis2TopLabelPosition === "top"),
       labelPlacement: "right",
     }));
-  }, [ideas, xOrder, yOrder, axis1PositiveEnd, axis2PositiveEnd]);
+  }, [ideas, xOrder, yOrder, axis1LeftLabelPosition, axis2TopLabelPosition]);
 
   const maxAbsDomain = useMemo(() => {
     if (!ideas.length) return 1;
@@ -407,10 +421,10 @@ export default function Home() {
     }));
   }, [rankedPoints, chartFrameSize.width, chartFrameSize.height, maxAbsDomain]);
 
-  const axis1PositiveLabel = axis1PositiveEnd === "top" ? axis1TopLabel : axis1BottomLabel;
-  const axis1NegativeLabel = axis1PositiveEnd === "top" ? axis1BottomLabel : axis1TopLabel;
-  const axis2PositiveLabel = axis2PositiveEnd === "top" ? axis2TopLabel : axis2BottomLabel;
-  const axis2NegativeLabel = axis2PositiveEnd === "top" ? axis2BottomLabel : axis2TopLabel;
+  const axis1NegativeLabel = axis1LeftLabelPosition === "top" ? axis1TopLabel : axis1BottomLabel;
+  const axis1PositiveLabel = axis1LeftLabelPosition === "top" ? axis1BottomLabel : axis1TopLabel;
+  const axis2PositiveLabel = axis2TopLabelPosition === "top" ? axis2TopLabel : axis2BottomLabel;
+  const axis2NegativeLabel = axis2TopLabelPosition === "top" ? axis2BottomLabel : axis2TopLabel;
 
   function goToIdeasStep() {
     if (
@@ -506,8 +520,8 @@ export default function Home() {
         axis_1_bottom_label: axis1BottomLabel.trim(),
         axis_2_top_label: axis2TopLabel.trim(),
         axis_2_bottom_label: axis2BottomLabel.trim(),
-        axis_1_positive_end: axis1PositiveEnd,
-        axis_2_positive_end: axis2PositiveEnd,
+        axis_1_left_label_position: axis1LeftLabelPosition,
+        axis_2_top_label_position: axis2TopLabelPosition,
       },
       created_at: new Date().toISOString(),
     };
@@ -563,8 +577,22 @@ export default function Home() {
     setAxis1BottomLabel(typeof ideasMeta.axis_1_bottom_label === "string" ? ideasMeta.axis_1_bottom_label : "Bottom");
     setAxis2TopLabel(typeof ideasMeta.axis_2_top_label === "string" ? ideasMeta.axis_2_top_label : "Top");
     setAxis2BottomLabel(typeof ideasMeta.axis_2_bottom_label === "string" ? ideasMeta.axis_2_bottom_label : "Bottom");
-    setAxis1PositiveEnd(ideasMeta.axis_1_positive_end === "bottom" ? "bottom" : "top");
-    setAxis2PositiveEnd(ideasMeta.axis_2_positive_end === "bottom" ? "bottom" : "top");
+    const legacyAxis1Positive = ideasMeta.axis_1_positive_end;
+    const legacyAxis2Positive = ideasMeta.axis_2_positive_end;
+    setAxis1LeftLabelPosition(
+      ideasMeta.axis_1_left_label_position === "top"
+        ? "top"
+        : legacyAxis1Positive === "top"
+          ? "bottom"
+          : "top",
+    );
+    setAxis2TopLabelPosition(
+      ideasMeta.axis_2_top_label_position === "bottom"
+        ? "bottom"
+        : legacyAxis2Positive === "bottom"
+          ? "bottom"
+          : "top",
+    );
     setSeriesName(typeof ideasMeta.series_name === "string" ? ideasMeta.series_name : "");
     setShouldSave(true);
     setSavedRankingId(target.id);
@@ -591,12 +619,12 @@ export default function Home() {
     setStep("labels");
     setAxis1("Effort");
     setAxis2("Impact");
-    setAxis1TopLabel("Low effort");
-    setAxis1BottomLabel("High effort");
+    setAxis1TopLabel("High effort");
+    setAxis1BottomLabel("Low effort");
     setAxis2TopLabel("High impact");
     setAxis2BottomLabel("Low impact");
-    setAxis1PositiveEnd("top");
-    setAxis2PositiveEnd("top");
+    setAxis1LeftLabelPosition("bottom");
+    setAxis2TopLabelPosition("top");
     setSeriesName("");
     setShouldSave(true);
     setSelectedSavedId("");
@@ -667,7 +695,21 @@ export default function Home() {
 
         {step === "labels" && (
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold">1. Define axis continua</h2>
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+              <h2 className="text-lg font-semibold">How this works</h2>
+              <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-zinc-700">
+                <li>
+                  Define the two ways you&apos;ll rank your concepts, ideas, features, whatever. The classic example is
+                  effort and impact. You&apos;ll also name the ends of those axes, like &quot;high effort&quot; and
+                  &quot;low effort&quot;.
+                </li>
+                <li>List out all the ideas. Get &apos;em all out there!</li>
+                <li>Rank the ideas along the first axis.</li>
+                <li>Rank the ideas along the second axis.</li>
+                <li>See the results!</li>
+              </ol>
+            </div>
+            <h2 className="text-xl font-semibold">1. Define your axis</h2>
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-3 rounded-xl border border-zinc-200 p-4">
                 <h3 className="font-semibold">X Axis</h3>
@@ -696,14 +738,14 @@ export default function Home() {
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium">
-                  Which end is positive?
+                  Which label should be on the left? (left is negative)
                   <select
-                    value={axis1PositiveEnd}
-                    onChange={(e) => setAxis1PositiveEnd(e.target.value as "top" | "bottom")}
+                    value={axis1LeftLabelPosition}
+                    onChange={(e) => setAxis1LeftLabelPosition(e.target.value as "top" | "bottom")}
                     className="rounded-lg border border-zinc-300 px-3 py-2 outline-none ring-indigo-500 focus:ring"
                   >
-                    <option value="top">Top end is positive</option>
-                    <option value="bottom">Bottom end is positive</option>
+                    <option value="top">Top end label on the left</option>
+                    <option value="bottom">Bottom end label on the left</option>
                   </select>
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium">
@@ -753,14 +795,14 @@ export default function Home() {
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-medium">
-                  Which end is positive?
+                  Which label should be on top? (top is positive)
                   <select
-                    value={axis2PositiveEnd}
-                    onChange={(e) => setAxis2PositiveEnd(e.target.value as "top" | "bottom")}
+                    value={axis2TopLabelPosition}
+                    onChange={(e) => setAxis2TopLabelPosition(e.target.value as "top" | "bottom")}
                     className="rounded-lg border border-zinc-300 px-3 py-2 outline-none ring-indigo-500 focus:ring"
                   >
-                    <option value="top">Top end is positive</option>
-                    <option value="bottom">Bottom end is positive</option>
+                    <option value="top">Top end label on top</option>
+                    <option value="bottom">Bottom end label on top</option>
                   </select>
                 </label>
               </div>
@@ -843,6 +885,9 @@ export default function Home() {
             <p className="text-sm text-zinc-600">
               Drag cards vertically to rank from {axis1TopLabel} to {axis1BottomLabel}.
             </p>
+            <p className="text-sm text-zinc-600">
+              You can edit or delete items by hovering over them. ✎ = edit, 🗑 = delete.
+            </p>
             <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600">
               <p className="font-medium">{axis1TopLabel}</p>
               <div className="h-6 border-l border-dashed border-zinc-300" />
@@ -882,6 +927,9 @@ export default function Home() {
             <h2 className="text-xl font-semibold">4. Sort by {axis2}</h2>
             <p className="text-sm text-zinc-600">
               Drag cards vertically to rank from {axis2TopLabel} to {axis2BottomLabel}.
+            </p>
+            <p className="text-sm text-zinc-600">
+              You can edit or delete items by hovering over them. ✎ = edit, 🗑 = delete.
             </p>
             <div className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-xs text-zinc-600">
               <p className="font-medium">{axis2TopLabel}</p>
@@ -996,22 +1044,10 @@ export default function Home() {
               </ResponsiveContainer>
             </div>
 
-            <div className="grid gap-3 text-sm text-zinc-700 md:grid-cols-2">
-              <p className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                <span className="font-medium">X ends:</span> top = {axis1TopLabel} | bottom = {axis1BottomLabel} | positive
-                end = {axis1PositiveEnd}
-              </p>
-              <p className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                <span className="font-medium">Y ends:</span> top = {axis2TopLabel} | bottom = {axis2BottomLabel} | positive
-                end = {axis2PositiveEnd}
-              </p>
-            </div>
-
             <ol className="space-y-2 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
               {rankedPointsWithLabels.map((point) => (
                 <li key={point.idea} className="text-sm text-zinc-700">
-                  <span className="font-medium">{point.idea}</span> - ({axis1}: {point.x}, {axis2}: {point.y}) [ranks:{" "}
-                  x={point.xRank}, y={point.yRank}]
+                  <span className="font-medium">{point.idea}</span> - {axis1}: {point.x} + {axis2}: {point.y}
                 </li>
               ))}
             </ol>
@@ -1048,7 +1084,7 @@ export default function Home() {
                     onClick={saveRanking}
                     className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
                   >
-                    {isSaving ? "Saving..." : "Save ranking"}
+                    {isSaving ? "Saving..." : "☁ Save ranking"}
                   </button>
                   <button
                     type="button"
@@ -1056,10 +1092,21 @@ export default function Home() {
                     onClick={shareSavedRanking}
                     className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Share link
+                    📋 Copy URL for Sharing
                   </button>
                 </>
               )}
+            </div>
+
+            <div className="grid gap-3 text-sm text-zinc-700 md:grid-cols-2">
+              <p className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                <span className="font-medium">X ends:</span> top = {axis1TopLabel} | bottom = {axis1BottomLabel} | left
+                (negative) = {axis1NegativeLabel}
+              </p>
+              <p className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+                <span className="font-medium">Y ends:</span> top = {axis2TopLabel} | bottom = {axis2BottomLabel} | top
+                (positive) = {axis2PositiveLabel}
+              </p>
             </div>
 
             <button
