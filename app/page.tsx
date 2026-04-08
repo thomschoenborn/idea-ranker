@@ -690,7 +690,13 @@ export default function Home() {
       <main className="mx-auto max-w-4xl rounded-2xl border border-zinc-200 bg-white p-8 shadow-xl">
         <header className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">IdeaRanker</h1>
-          <p className="mt-2 text-sm text-zinc-600">Rank ideas along two axes and visualize them as a scatter plot.</p>
+          <p className="mt-2 text-sm text-zinc-600">
+            Rank ideas, features, tasks or other concept along two axes, and visualize them as a scatter plot.
+          </p>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-zinc-600">
+            <li>Product feature example: rank features based on effort and impact.</li>
+            <li>Task example: prioritize tasks based on importance and urgency (the Eisenhower Matrix)</li>
+          </ul>
         </header>
 
         {step === "labels" && (
@@ -699,9 +705,8 @@ export default function Home() {
               <h2 className="text-lg font-semibold">How this works</h2>
               <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-zinc-700">
                 <li>
-                  Define the two ways you&apos;ll rank your concepts, ideas, features, whatever. The classic example is
-                  effort and impact. You&apos;ll also name the ends of those axes, like &quot;high effort&quot; and
-                  &quot;low effort&quot;.
+                  Define the two ways (axes) you&apos;ll rank your concepts. You&apos;ll also name the ends of those
+                  axes, like &quot;high effort&quot; and &quot;low effort&quot;.
                 </li>
                 <li>List out all the ideas. Get &apos;em all out there!</li>
                 <li>Rank the ideas along the first axis.</li>
